@@ -19,7 +19,7 @@ if($_SESSION['admin']){
 	foreach($directories AS $directoryName){
 		if(file_exists("addons/".$directoryName."/__acp.php") == true AND file_exists("addons/".$directoryName."/__page.php") == true){
 			$addonList[] = $directoryName;
-			$btnContent .= "<a class='btn btn-default' href='?p=".$directoryName."'>".ucfirst($directoryName)." settings</a><br />";
+			$btnContent .= "<a class='btn btn-default' href='?p=".$directoryName."'>".ucfirst((string) $directoryName)." settings</a><br />";
 		}
 	}
 
@@ -107,7 +107,7 @@ if($_SESSION['admin']){
 		if(isset($_POST['username']) AND isset($_POST['password'])){
 			if($_POST['username'] AND $_POST['password']){
 				$username = $mysqli->real_escape_string($_POST['username']);
-				$password = $mysqli->real_escape_string(hash("sha256", $_POST['password']));
+				$password = $mysqli->real_escape_string(hash("sha256", (string) $_POST['password']));
 				$mysqli->query("UPDATE faucet_settings Set value = '$username' WHERE id = '12'");
 				$mysqli->query("UPDATE faucet_settings Set value = '$password' WHERE id = '13'");
 				$content .= alert("success", "Username and Password was changed successfully.");
@@ -313,7 +313,7 @@ if($_SESSION['admin']){
 		      <option>Default</option>
 		      ".$optionsBootsWatch."
 		    </select>
-		    <span class='help-block demoBootsWatch'><a target='_blank' href='".(($selectedTheme != "Default") ? 'https://bootswatch.com/3/'.(strtolower($selectedTheme)).'/' : '#')."'>Demo</a></span>
+		    <span class='help-block demoBootsWatch'><a target='_blank' href='".(($selectedTheme != "Default") ? 'https://bootswatch.com/3/'.(strtolower((string) $selectedTheme)).'/' : '#')."'>Demo</a></span>
 		    <script>
 		    $(document).ready(function(){
 		    	$('.bootswatchInput').change(function(){
@@ -847,7 +847,7 @@ if($_SESSION['admin']){
 		if(!$_POST['ips']){
 			$content .= alert("danger", "Can't find IP Address.");
 		} else {
-			$ips = explode("\r\n", $_POST['ips']);
+			$ips = explode("\r\n", (string) $_POST['ips']);
 			foreach($ips as $banips) {
 			    $banips2 = $mysqli->real_escape_string($banips);
 			    $mysqli->query("INSERT INTO faucet_banned_ip (ip_address) VALUES ('$banips2')");
@@ -924,7 +924,7 @@ if($_SESSION['admin']){
 		if(!$_POST['addy']){
 			$content .= alert("danger", "Can't find Bitcoin Address or EC-UserID.");
 		} else {
-			$addy = explode("\r\n", $_POST['addy']);
+			$addy = explode("\r\n", (string) $_POST['addy']);
 			foreach($addy as $addy2) {
 			    $banaddy = $mysqli->real_escape_string($addy2);
 			    $mysqli->query("INSERT INTO faucet_banned_address (address) VALUES ('$banaddy')");
@@ -1055,7 +1055,7 @@ if($_SESSION['admin']){
 
 		if($_POST['username'] AND $_POST['password']){
 			$username = $mysqli->real_escape_string($_POST['username']);
-			$password = $mysqli->real_escape_string(hash("sha256", $_POST['password']));
+			$password = $mysqli->real_escape_string(hash("sha256", (string) $_POST['password']));
 
 			$UserDB = $mysqli->query("SELECT * FROM faucet_settings WHERE id = '12' LIMIT 1")->fetch_assoc()['value'];
 			$PwDB = $mysqli->query("SELECT * FROM faucet_settings WHERE id = '13' LIMIT 1")->fetch_assoc()['value'];
