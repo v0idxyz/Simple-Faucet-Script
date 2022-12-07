@@ -3,9 +3,9 @@
 // Database Configuration
 
 $dbHost = "localhost";
-$dbUser = "";
+$dbUser = "root";
 $dbPW = "";
-$dbName = "";
+$dbName = "simplefaucet";
 
 // Establish connection
 
