@@ -10,7 +10,7 @@ $selectedTheme = $mysqli->query("SELECT value FROM faucet_settings WHERE id = '2
 if($selectedTheme == "")
 		$tpl->assign("bootstrapStyle", "css/bootstrap.min.css");
 	else
-		$tpl->assign("bootstrapStyle", "https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/".(strtolower($selectedTheme))."/bootstrap.min.css");
+		$tpl->assign("bootstrapStyle", "https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/".(strtolower((string) $selectedTheme))."/bootstrap.min.css");
 
 
 $Faucetname = $mysqli->query("SELECT * FROM faucet_settings WHERE id = '1'")->fetch_assoc()['value'];

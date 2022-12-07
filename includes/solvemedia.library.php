@@ -57,7 +57,7 @@ define("ADCOPY_SIGNUP",            "http://api.solvemedia.com/public/signup");
 function _adcopy_qsencode ($data) {
         $req = "";
         foreach ( $data as $key => $value )
-                $req .= $key . '=' . urlencode( stripslashes($value) ) . '&';
+                $req .= $key . '=' . urlencode( stripslashes((string) $value) ) . '&';
 
         // Cut the last '&'
         $req=substr($req,0,strlen($req)-1);
@@ -186,7 +186,7 @@ function solvemedia_check_answer ($privkey, $remoteip, $challenge, $response, $h
                                                  )
                                           );
 
-        $answers = explode ("\n", $response [1]);
+        $answers = explode ("\n", (string) $response [1]);
         $adcopy_response = new SolveMediaResponse();
 
         if( strlen($hashkey) ){
@@ -233,7 +233,7 @@ function solvemedia_precheck_response ($privkey, $verifycode)
 {
 
     //discard spam submissions
-    if ($verifycode == null || strlen($verifycode) == 0 ) {
+    if ($verifycode == null || strlen((string) $verifycode) == 0 ) {
             $adcopy_response = new SolveMediaResponse();
             $adcopy_response->is_valid = false;
             $adcopy_response->error = 'incorrect-solution';
@@ -247,7 +247,7 @@ function solvemedia_precheck_response ($privkey, $verifycode)
                                              )
                                       );
 
-    $answers = explode ("\n", $response [1]);
+    $answers = explode ("\n", (string) $response [1]);
     $adcopy_response = new SolveMediaResponse();
 
     if (trim ($answers [0]) == 'true') {

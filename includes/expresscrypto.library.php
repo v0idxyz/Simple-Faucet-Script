@@ -38,7 +38,7 @@
             } else {
                 $response = $this->__execCURL($method, $params);
             }
-            $response = json_decode($response, true);
+            $response = json_decode((string) $response, true);
             if($response) {
                 $this->last_status = $response['status'];
             } else {

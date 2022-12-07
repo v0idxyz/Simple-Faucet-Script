@@ -87,7 +87,7 @@ class FaucetPay
         } else {
             $response = $this->__execCURL($method, $params);
         }
-        $response = json_decode($response, true);
+        $response = json_decode((string) $response, true);
         if($response) {
             $this->last_status = $response['status'];
         } else {
@@ -131,7 +131,7 @@ class FaucetPay
             return array(
                 'success' => true,
                 'message' => 'Payment sent to your address using FaucetPay.io',
-                'html' => '<div class="alert alert-success">' . htmlspecialchars($amount) . ' satoshi was sent to your account at FaucetPay.io.</div>',
+                'html' => '<div class="alert alert-success">' . htmlspecialchars((string) $amount) . ' satoshi was sent to your account at FaucetPay.io.</div>',
                 'html_coin' => '<div class="alert alert-success">' . htmlspecialchars(rtrim(rtrim(sprintf("%.8f", $amount/100000000), '0'), '.')) . ' '.$this->currency.' was sent to your account at FaucetPay.io.</div>',
                 'balance' => $r["balance"],
                 'balance_bitcoin' => $r["balance_bitcoin"],
@@ -153,7 +153,7 @@ class FaucetPay
             return array(
                 'success' => false,
                 'message' => $r["message"],
-                'html' => '<div class="alert alert-danger">' . htmlspecialchars($r["message"]) . '</div>',
+                'html' => '<div class="alert alert-danger">' . htmlspecialchars((string) $r["message"]) . '</div>',
                 'response' => json_encode($r)
             );
         }

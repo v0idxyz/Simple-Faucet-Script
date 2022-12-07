@@ -91,7 +91,7 @@ class FaucetHub
         } else {
             $response = $this->__execCURL($method, $params);
         }
-        $response = json_decode($response, true);
+        $response = json_decode((string) $response, true);
         if($response) {
             $this->last_status = $response['status'];
         } else {
@@ -135,8 +135,8 @@ class FaucetHub
             return array(
                 'success' => true,
                 'message' => 'Payment sent to your address using FaucetHub.io',
-                'html' => '<div class="alert alert-success">' . htmlspecialchars($amount) . ' satoshi was sent to <a target="_blank" href="https://faucethub.io/balance/' . rawurlencode($to) . '">your account at FaucetHub.io</a>.</div>',
-                'html_coin' => '<div class="alert alert-success">' . htmlspecialchars(rtrim(rtrim(sprintf("%.8f", $amount/100000000), '0'), '.')) . ' '.$this->currency.' was sent to <a target="_blank" href="https://faucethub.io/balance/' . rawurlencode($to) . '">your account at FaucetHub.io</a>.</div>',
+                'html' => '<div class="alert alert-success">' . htmlspecialchars((string) $amount) . ' satoshi was sent to <a target="_blank" href="https://faucethub.io/balance/' . rawurlencode((string) $to) . '">your account at FaucetHub.io</a>.</div>',
+                'html_coin' => '<div class="alert alert-success">' . htmlspecialchars(rtrim(rtrim(sprintf("%.8f", $amount/100000000), '0'), '.')) . ' '.$this->currency.' was sent to <a target="_blank" href="https://faucethub.io/balance/' . rawurlencode((string) $to) . '">your account at FaucetHub.io</a>.</div>',
                 'balance' => $r["balance"],
                 'balance_bitcoin' => $r["balance_bitcoin"],
                 'response' => json_encode($r)
@@ -157,7 +157,7 @@ class FaucetHub
             return array(
                 'success' => false,
                 'message' => $r["message"],
-                'html' => '<div class="alert alert-danger">' . htmlspecialchars($r["message"]) . '</div>',
+                'html' => '<div class="alert alert-danger">' . htmlspecialchars((string) $r["message"]) . '</div>',
                 'response' => json_encode($r)
             );
         }

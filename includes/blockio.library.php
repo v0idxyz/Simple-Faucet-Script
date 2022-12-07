@@ -26,7 +26,7 @@ class BlockIo
     private $encryption_key = "";
     private $version;
     private $withdrawal_methods;
-    private $sweep_methods;
+    private readonly array $sweep_methods;
 
     public function __construct($api_key, $pin, $api_version = 2)
     { // the constructor
@@ -132,7 +132,7 @@ class BlockIo
 	 { // we have signatures to append
 	 
 	   // get our encryption key ready
-	   if (strlen($this->encryption_key) == 0)
+	   if (strlen((string) $this->encryption_key) == 0)
 	   {
 		$this->encryption_key = $this->pinToAesKey($this->pin);
 	   }
@@ -238,13 +238,13 @@ class BlockIo
       for ($block=1; $block<=$key_length; $block++) 
       { 
       	// Initial hash for this block 
-    	$ib = $h = hash_hmac($a, $salt . pack('N', $block), $password, true); 
+    	$ib = $h = hash_hmac((string) $a, $salt . pack('N', $block), (string) $password, true); 
  
 	// Perform block iterations 
     	for ($i=1; $i<$rounds; $i++) 
     	{ 
       	  // XOR each iteration
-      	  $ib ^= ($h = hash_hmac($a, $h, $password, true)); 
+      	  $ib ^= ($h = hash_hmac((string) $a, $h, (string) $password, true)); 
     	} 
  
 	// Append iterated block 
@@ -262,9 +262,9 @@ class BlockIo
       # encrypt using aes256ecb
       # data is string, key is hex string (pbkdf2 with 2,048 iterations)
 
-      $key = hex2bin($key); // convert the hex into binary
+      $key = hex2bin((string) $key); // convert the hex into binary
 
-      $padding = 16 - (strlen($data) % 16);
+      $padding = 16 - (strlen((string) $data) % 16);
       $data .= str_repeat(chr($padding), $padding);
 
       $ciphertext = openssl_encrypt($data, 'AES-256-ECB', $key, true);
@@ -288,9 +288,9 @@ class BlockIo
     {
         # data must be in base64 string, $key is binary of hashed pincode
     
-        $key = hex2bin($key); // convert the hex into binary
+        $key = hex2bin((string) $key); // convert the hex into binary
 
-	$ciphertext_dec = base64_decode($b64ciphertext);
+	$ciphertext_dec = base64_decode((string) $b64ciphertext);
     
 	$data_dec = openssl_decrypt($ciphertext_dec, 'AES-256-ECB', $key, OPENSSL_RAW_DATA, NULL);
 
@@ -304,10 +304,25 @@ class BlockKey
 {
 
     public $k;
+    /**
+     * @var \GMP
+     */
     public $a;
+    /**
+     * @var \GMP
+     */
     public $b;
+    /**
+     * @var \GMP
+     */
     public $p;
+    /**
+     * @var \GMP
+     */
     public $n;
+    /**
+     * @var array<string, \GMP>
+     */
     public $G;
     public $networkPrefix;
     public $c = true; //compressed or not
@@ -335,13 +350,13 @@ class BlockKey
 	$v = "0101010101010101010101010101010101010101010101010101010101010101";
 
 	// step D
-	$k = hash_hmac('sha256', hex2bin($v) . hex2bin("00") . hex2bin($key) . hex2bin($hash), hex2bin($k));
+	$k = hash_hmac('sha256', hex2bin($v) . hex2bin("00") . hex2bin((string) $key) . hex2bin((string) $hash), hex2bin($k));
 
 	// step E
 	$v = hash_hmac('sha256', hex2bin($v), hex2bin($k));
 
 	// step F
-	$k = hash_hmac('sha256', hex2bin($v) . hex2bin("01") . hex2bin($key) . hex2bin($hash), hex2bin($k));
+	$k = hash_hmac('sha256', hex2bin($v) . hex2bin("01") . hex2bin((string) $key) . hex2bin((string) $hash), hex2bin($k));
 
 	// step G
 	$v = hash_hmac('sha256', hex2bin($v), hex2bin($k));
@@ -447,7 +462,7 @@ class BlockKey
      */
     public function hash256($data)
     {
-        return hash('sha256', hex2bin(hash('sha256', $data)));
+        return hash('sha256', hex2bin(hash('sha256', (string) $data)));
     }
 
     /***
@@ -477,7 +492,7 @@ class BlockKey
         //get number of leading zeros
         $leading = '';
         $i=0;
-        while(substr($data, $i, 1) == '0')
+        while(substr((string) $data, $i, 1) == '0')
         {
             if($i!= 0 && $i%2)
             {
@@ -502,10 +517,10 @@ class BlockKey
     public function base58_decode($encodedData, $littleEndian = true)
     {
         $res = gmp_init(0, 10);
-        $length = strlen($encodedData);
+        $length = strlen((string) $encodedData);
         if($littleEndian)
         {
-            $encodedData = strrev($encodedData);
+            $encodedData = strrev((string) $encodedData);
         }
 
         for($i = $length - 1; $i >= 0; $i--)
@@ -515,13 +530,13 @@ class BlockKey
                                    $res,
                                    gmp_init(58, 10)
                            ),
-                           $this->base58_permutation(substr($encodedData, $i, 1), true)
+                           $this->base58_permutation(substr((string) $encodedData, $i, 1), true)
                    );
         }
 
         $res = gmp_strval($res, 16);
         $i = $length - 1;
-        while(substr($encodedData, $i, 1) == '1')
+        while(substr((string) $encodedData, $i, 1) == '1')
         {
             $res = '00' . $res;
             $i--;
@@ -875,18 +890,18 @@ class BlockKey
      */
     public function getPubKeyPointsWithDerPubKey($derPubKey)
     {
-        if(substr($derPubKey, 0, 2) == '04' && strlen($derPubKey) == 130)
+        if(substr((string) $derPubKey, 0, 2) == '04' && strlen((string) $derPubKey) == 130)
         {
             //uncompressed der encoded public key
-            $x = substr($derPubKey, 2, 64);
-            $y = substr($derPubKey, 66, 64);
+            $x = substr((string) $derPubKey, 2, 64);
+            $y = substr((string) $derPubKey, 66, 64);
             return array('x' => $x, 'y' => $y);
         }
-        else if((substr($derPubKey, 0, 2) == '02' || substr($derPubKey, 0, 2) == '03') && strlen($derPubKey) == 66)
+        else if((substr((string) $derPubKey, 0, 2) == '02' || substr((string) $derPubKey, 0, 2) == '03') && strlen((string) $derPubKey) == 66)
         {
             //compressed der encoded public key
-            $x = substr($derPubKey, 2, 64);
-            $y = $this->calculateYWithX($x, substr($derPubKey, 0, 2));
+            $x = substr((string) $derPubKey, 2, 64);
+            $y = $this->calculateYWithX($x, substr((string) $derPubKey, 0, 2));
             return array('x' => $x, 'y' => $y);
         }
         else
@@ -968,12 +983,12 @@ class BlockKey
         $pubKey['x']	= gmp_strval($pubKey['x'], 16);
         $pubKey['y']	= gmp_strval($pubKey['y'], 16);
 
-        while(strlen($pubKey['x']) < 64)
+        while(strlen((string) $pubKey['x']) < 64)
         {
             $pubKey['x'] = '0' . $pubKey['x'];
         }
 
-        while(strlen($pubKey['y']) < 64)
+        while(strlen((string) $pubKey['y']) < 64)
         {
             $pubKey['y'] = '0' . $pubKey['y'];
         }
@@ -1050,7 +1065,7 @@ class BlockKey
             }
         }
 
-        $sha256		    = hash('sha256', hex2bin($address));
+        $sha256		    = hash('sha256', hex2bin((string) $address));
         $ripem160 	    = hash('ripemd160', hex2bin($sha256));
         $address 	    = $this->getNetworkPrefix() . $ripem160;
 
@@ -1096,7 +1111,7 @@ class BlockKey
     public function fromPassphrase($pp)
     {  // take a sha256 hash of the passphrase, and then set it as the private key
     
-	$hashed = hash('sha256', hex2bin($pp));
+	$hashed = hash('sha256', hex2bin((string) $pp));
 	
 	$this->setPrivateKey($hashed);
 
@@ -1111,7 +1126,7 @@ class BlockKey
 	 if ($this->validateWifKey($pp) === false) { throw new \Exception("Invalid Private Key provided."); }
 
 	 $fullStr = $this->base58_decode($pp);
-	 $withoutVersion = substr($fullStr,2);
+	 $withoutVersion = substr((string) $fullStr,2);
 	 $withoutChecksumAndVersion = substr($withoutVersion,0,64);
 
 	 $this->setPrivateKey($withoutChecksumAndVersion);
@@ -1171,7 +1186,7 @@ class BlockKey
      */
     public function validateAddress($address)
     {
-        $address    = hex2bin($this->base58_decode($address));
+        $address    = hex2bin((string) $this->base58_decode($address));
         if(strlen($address) != 25)
             return false;
         $checksum   = substr($address, 21, 4);
@@ -1194,10 +1209,10 @@ class BlockKey
     public function validateWifKey($wif)
     {
         $key            = $this->base58_decode($wif, true);
-        $length         = strlen($key);
-        $firstSha256    = hash('sha256', hex2bin(substr($key, 0, $length - 8)));
+        $length         = strlen((string) $key);
+        $firstSha256    = hash('sha256', hex2bin(substr((string) $key, 0, $length - 8)));
         $secondSha256   = hash('sha256', hex2bin($firstSha256));
-        if(substr($secondSha256, 0, 8) == substr($key, $length - 8, 8))
+        if(substr($secondSha256, 0, 8) == substr((string) $key, $length - 8, 8))
             return true;
         else
             return false;
@@ -1205,7 +1220,7 @@ class BlockKey
 
     function String2Hex($string){
     	     $hex='';
-    	     for ($i=0; $i < strlen($string); $i++){
+    	     for ($i=0; $i < strlen((string) $string); $i++){
              	 $hex .= dechex(ord($string[$i]));
 	     }
     	     return $hex;
@@ -1305,7 +1320,7 @@ class BlockKey
     
         $points = $this->getSignatureHashPoints($hash, $nonce);
 
-        $signature = '02' . dechex(strlen(hex2bin($points['R']))) . $points['R'] . '02' . dechex(strlen(hex2bin($points['S']))) . $points['S'];
+        $signature = '02' . dechex(strlen(hex2bin((string) $points['R']))) . $points['R'] . '02' . dechex(strlen(hex2bin((string) $points['S']))) . $points['S'];
         $signature = '30' . dechex(strlen(hex2bin($signature))) . $signature;
 
         return $signature;
@@ -1323,7 +1338,7 @@ class BlockKey
     public function signMessage($message, $compressed = true, $nonce = null)
     {
 
-        $hash = $this->hash256("\x18Bitcoin Signed Message:\n" . $this->numToVarIntString(strlen($message)). $message);
+        $hash = $this->hash256("\x18Bitcoin Signed Message:\n" . $this->numToVarIntString(strlen((string) $message)). $message);
         $points = $this->getSignatureHashPoints(
                                                 $hash,
                                                 $nonce
@@ -1332,10 +1347,10 @@ class BlockKey
         $R = $points['R'];
         $S = $points['S'];
 
-        while(strlen($R) < 64)
+        while(strlen((string) $R) < 64)
             $R = '0' . $R;
 
-        while(strlen($S) < 64)
+        while(strlen((string) $S) < 64)
             $S = '0' . $S;
 
         $res = "\n-----BEGIN BITCOIN SIGNED MESSAGE-----\n";
@@ -1460,10 +1475,10 @@ class BlockKey
         $pubKey['x'] = gmp_strval($pubKey['x'], 16);
         $pubKey['y'] = gmp_strval($pubKey['y'], 16);
 
-        while(strlen($pubKey['x']) < 64)
+        while(strlen((string) $pubKey['x']) < 64)
             $pubKey['x'] = '0' . $pubKey['x'];
 
-        while(strlen($pubKey['y']) < 64)
+        while(strlen((string) $pubKey['y']) < 64)
             $pubKey['y'] = '0' . $pubKey['y'];
 
         $derPubKey = $this->getDerPubKeyWithPubKeyPoints($pubKey, $isCompressed);
@@ -1550,7 +1565,7 @@ class BlockKey
      */
     public function checkDerSignature($pubKey, $signature, $hash)
     {
-        $signature = hex2bin($signature);
+        $signature = hex2bin((string) $signature);
         if('30' != bin2hex(substr($signature, 0, 1)))
             return false;
 
@@ -1572,10 +1587,10 @@ class BlockKey
     public function checkSignatureForRawMessage($rawMessage)
     {
         //recover message.
-        preg_match_all("#-----BEGIN BITCOIN SIGNED MESSAGE-----\n(.{0,})\n-----BEGIN SIGNATURE-----\n#USi", $rawMessage, $out);
+        preg_match_all("#-----BEGIN BITCOIN SIGNED MESSAGE-----\n(.{0,})\n-----BEGIN SIGNATURE-----\n#USi", (string) $rawMessage, $out);
         $message = $out[1][0];
 
-        preg_match_all("#\n-----BEGIN SIGNATURE-----\n(.{0,})\n(.{0,})\n-----END BITCOIN SIGNED MESSAGE-----#USi", $rawMessage, $out);
+        preg_match_all("#\n-----BEGIN SIGNATURE-----\n(.{0,})\n(.{0,})\n-----END BITCOIN SIGNED MESSAGE-----#USi", (string) $rawMessage, $out);
         $address = $out[1][0];
         $signature = $out[2][0];
 
@@ -1592,10 +1607,10 @@ class BlockKey
      */
     public function checkSignatureForMessage($address, $encodedSignature, $message)
     {
-        $hash = $this->hash256("\x18Bitcoin Signed Message:\n" . $this->numToVarIntString(strlen($message)) . $message);
+        $hash = $this->hash256("\x18Bitcoin Signed Message:\n" . $this->numToVarIntString(strlen((string) $message)) . $message);
 
         //recover flag
-        $signature = base64_decode($encodedSignature);
+        $signature = base64_decode((string) $encodedSignature);
 
         $flag = hexdec(bin2hex(substr($signature, 0, 1)));
 
@@ -1616,7 +1631,7 @@ class BlockKey
 function strToHex($string)
 {
     $hex='';
-    for ($i=0; $i < strlen($string); $i++)
+    for ($i=0; $i < strlen((string) $string); $i++)
     {
         $hex .= dechex(ord($string[$i]));
     }

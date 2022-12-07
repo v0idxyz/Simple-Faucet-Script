@@ -121,7 +121,7 @@ function faucetInfo($mysqli){
 	if($blockioApiKey AND $blockioPin)
 		$availableWithdrawalMethods .= "direct,";
 
-	$jsonArray['withdrawal_methods'] = rtrim($availableWithdrawalMethods, ",");
+	$jsonArray['withdrawal_methods'] = rtrim((string) $availableWithdrawalMethods, ",");
 
 	header('Content-Type: application/json');
 	echo json_encode($jsonArray, JSON_PRETTY_PRINT);
